@@ -124,7 +124,7 @@ class FlysystemServiceProvider extends ServiceProvider
                 
                 if (class_exists('\Jackalope\RepositoryFactoryJackrabbit'))
                 {
-                    $repository = new \Jackalope\RepositoryFactoryJackrabbit()->getRepository([
+                    $repository = (new \Jackalope\RepositoryFactoryJackrabbit())->getRepository([
                         "jackalope.jackrabbit_uri" => $config['jackrabbit_url'],
                         'jackalope.logger' => $logger,
                     ]);
@@ -132,7 +132,7 @@ class FlysystemServiceProvider extends ServiceProvider
                 }
                 elseif (class_exists('Jackalope\RepositoryFactoryDoctrineDBAL'))
                 {
-                    $repository = new \Jackalope\RepositoryFactoryDoctrineDBAL()->getRepository([
+                    $repository = (new \Jackalope\RepositoryFactoryDoctrineDBAL())->getRepository([
                         'jackalope.doctrine_dbal_connection' => \Doctrine\DBAL\DriverManager::getConnection(
                                 Arr::only($config, ['driver', 'host', 'user', 'password', 'dbname', 'path'])
                             ),
@@ -141,7 +141,7 @@ class FlysystemServiceProvider extends ServiceProvider
                 }
                 elseif (class_exists('\Jackalope\RepositoryFactoryPrismic'))
                 {
-                    $repository = new \Jackalope\RepositoryFactoryPrismic()->getRepository([
+                    $repository = (new \Jackalope\RepositoryFactoryPrismic())->getRepository([
                         'jackalope.prismic_uri' => $config['prismic_uri'],
                         'jackalope.logger' => $logger,
                     ]);
