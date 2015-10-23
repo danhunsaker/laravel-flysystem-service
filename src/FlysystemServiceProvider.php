@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Laravel\Flysystem;
 
+use Log;
 use Storage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
