@@ -1,0 +1,24 @@
+{
+    "name": "danhunsaker/laravel-flysystem-service",
+    "description": "Automatically registers every Flysystem adapter it recognizes as a Laravel Filesystem Driver.",
+    "type": "library",
+    "require": {
+        "php": "^5.6",
+        "illuminate/support": "^5.1",
+        "illuminate/filesystem": "^5.1",
+        "league/flysystem": "^1.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Daniel Hunsaker",
+            "email": "danhunsaker@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Danhunsaker\\Laravel\\Flysystem\\": "src/"
+        }
+    }
+}
