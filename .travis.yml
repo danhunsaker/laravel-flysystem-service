@@ -18,6 +18,6 @@ install:
   - if [[ "$(phpenv version-name)" != "hhvm" ]]; then echo 'error_reporting = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
   - travis_retry composer update --no-interaction --prefer-source $PREFER_LOWEST
 script:
-  - vendor/bin/phpunit -v --color -c .travis-phpunit$([[ "$(phpenv version-name)" == "hhvm" ]] && echo -n "-hhvm").xml
+  - phpunit -v --color -c .travis-phpunit$([[ "$(phpenv version-name)" == "hhvm" ]] && echo -n "-hhvm").xml
 after_success:
   - bash <(curl -s https://codecov.io/bash)
