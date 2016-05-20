@@ -3,6 +3,9 @@
 namespace Danhunsaker\Laravel\Flysystem;
 
 use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Support\Arr;
+use League\Flysystem\AdapterInterface;
+use Log;
 
 class FlysystemManager extends FilesystemManager
 {

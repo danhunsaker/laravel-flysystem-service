@@ -4,9 +4,6 @@ namespace Danhunsaker\Laravel\Flysystem;
 
 use Danhunsaker\Laravel\Flysystem\FlysystemManager;
 use Illuminate\Filesystem\FilesystemServiceProvider;
-use Illuminate\Support\Arr;
-use Log;
-use Storage;
 
 class FlysystemServiceProvider extends FilesystemServiceProvider
 {
@@ -19,7 +16,7 @@ class FlysystemServiceProvider extends FilesystemServiceProvider
      */
     public function boot()
     {
-        // 
+        //
     }
 
     /**
@@ -44,5 +41,7 @@ class FlysystemServiceProvider extends FilesystemServiceProvider
         $source = realpath(__DIR__ . '../config/filesystems.php');
 
         $this->publishes([$source => config_path('filesystems.php')]);
+
+        parent::register();
     }
 }

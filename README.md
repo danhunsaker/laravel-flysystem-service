@@ -32,7 +32,8 @@ The usual methods for using [Composer](https://getcomposer.org) apply here:
     composer require danhunsaker/laravel-flysystem-service
 
 You do still have to register one service, but only one, and at least you don't
-have to write it:
+have to write it.  Be sure to **REPLACE** the
+`Illuminate\Filesystem\FilesystemServiceProvider::class` line with the new one:
 
 ```php
 // In config/app.php
