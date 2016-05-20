@@ -49,6 +49,11 @@ return [
             'driver'      => 'local',
             'root'        => storage_path('app'),
 
+            // Optional cache settings, available with any storage driver
+            'cache'       => [
+                'driver' => 'memory',
+            ],
+
             // Optional Local Settings...
             // 'permissions' => [],
         ],

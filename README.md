@@ -59,6 +59,164 @@ that ships with Laravel.  You can also rename the existing file, then run the
 command without the `--force` flag, if you'd like to preserve the existing
 contents for transfer to the new file.
 
+### Cache Decorator ###
+
+Flysystem provides support for adding decorators to filesystem adapters,
+complete with an abstract implementation that other implementations can extend,
+reducing the number of methods they have to implement themselves if they don't
+particularly care about all of them.  They also provide a complete decorator
+that provides support for caching metadata, which can greatly speed up several
+operations on slow filesystems, such as cloud storage.
+
+Since this cache decorator is one of the official PHP League packages designed
+to be used with Flysystem, this package supports it as well.  Ensure you have
+`league/flysystem-cached-adapter`, then simply add a `cache` array to your drive
+definition.  Multiple cache drivers are supported directly, and each has unique
+options you can configure alongside it, so we'll break those down, below.
+
+> A [library](https://github.com/madewithlove/illuminate-psr-cache-bridge) has
+> been written for wrapping the Laravel cache implementation for use with PSR-6
+> consumers (such as the aforementioned `Psr6Cache` driver), but it hasn't (as
+> of this writing) been published to Packagist for use by third parties.  Once
+> it becomes available, this package will be updated to use it to provide the
+> use of Laravel's own caching system with the cache decorator.
+
+#### Flysystem Adapter ####
+
+Store the cached data in a file on one of the disks defined in your config.
+
+```php
+    'cache' => [
+        'driver' => 'adapter',
+        'disk'   => 'local',
+        'file'   => 'flysystem.cache',
+        'expire' => 300,
+    ],
+```
+
+#### Memcached ####
+
+Store the data on a Memcache server.
+
+```php
+    'cache' => [
+        'driver' => 'memcached',
+        'host'   => 'localhost',
+        'port'   => 11211,
+        'key'    => 'flysystem',
+        'expire' => 300,
+    ],
+```
+
+#### Memory ####
+
+Just store the cached data in a class instance ('application memory').  When the
+application shuts down, the cache will be lost.
+
+```php
+    'cache' => [
+        'driver' => 'memory',
+    ],
+```
+
+#### No Op ####
+
+Don't store the cached data at all.  Essentially the same as not providing a
+`cache` array at all.
+
+> Note: This driver **does not actually cache any data**.
+
+```php
+    'cache' => [
+        'driver' => 'noop',
+    ],
+```
+
+#### Redis ####
+
+Store the cached data on a Redis server.  Specify a Redis connection name from
+your `database` config.
+
+```php
+    'cache' => [
+        'driver'     => 'redis',
+        'connection' => 'default',
+        'key'        => 'flysystem',
+        'expire'     => 300,
+    ],
+```
+
+#### Stash ####
+
+Store the cached data using the Stash caching framework.  This is easily the
+most complex cache driver supported here.  Each `backend` is the full class name
+of a Stash cache driver, and the `options` array varies between which one you
+choose to use.  Alternately, you can set `backend` to a preconfigured instance
+of the driver, which is useful in cases such as the `Composite` driver, which is
+otherwise unsupported.  More information on these options is available on
+[the Stash site](http://www.stashphp.com/Drivers.html).
+
+```php
+    'cache' => [
+        'driver'  => 'stash',
+        'backend' => 'Stash\Driver\Filesystem',
+        'options' => [
+            'dirSplit'        => 500,
+            'path'            => storage_path('stash'),
+            'filePermissions' => 0660,
+            'dirPermissions'  => 0770,
+        ],
+        'key'     => 'flysystem',
+        'expire'  => 300,
+    ],
+```
+
+```php
+        'backend' => 'Stash\Driver\Sqlite',
+        'options' => [
+            'extension'       => 'pdo',
+            'version'         => 3,
+            'nesting'         => 0,
+            'path'            => storage_path('stash.db'),
+            'filePermissions' => 0660,
+            'dirPermissions'  => 0770,
+        ],
+```
+
+```php
+        'backend' => 'Stash\Driver\Apc',
+        'options' => [
+            'ttl'       => 3600,
+            'namespace' => 'stash',
+        ],
+```
+
+```php
+        'backend' => 'Stash\Driver\Memcache',
+        'options' => [
+            'servers'   => ['localhost', '11211'],
+            'extension' => 'memcached',
+            // Plus any other options Memcache might want...
+        ],
+```
+
+```php
+        'backend' => 'Stash\Driver\Redis',
+        'options' => [
+            'servers' => ['localhost', '6379'],
+        ],
+```
+
+```php
+        'backend' => 'Stash\Driver\Ephemeral',
+```
+
+#### Use An Instance ####
+
+You can also pass a preconfigured instance of your preferred cache driver
+instead of a driver name, if you like.  This is useful for third-party adapters,
+and for using external libraries through the `Psr6Cache` adapter.
+
 ## Contributions ##
 
 Pull requests, bug reports, and so forth are all welcome on [GitHub][].
