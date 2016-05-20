@@ -9,6 +9,8 @@ use Storage;
 
 class FlysystemServiceProvider extends ServiceProvider
 {
+    protected static $fsClass;
+
     /**
      * Bootstrap the application services.
      *
@@ -18,24 +20,24 @@ class FlysystemServiceProvider extends ServiceProvider
     {
         // Replace the built-in filesystems with Eventable counterparts if available
         if (class_exists('\League\Flysystem\EventableFilesystem\EventableFilesystem')) {
-            $fsClass = \League\Flysystem\EventableFilesystem\EventableFilesystem::class;
+            static::$fsClass = \League\Flysystem\EventableFilesystem\EventableFilesystem::class;
 
-            Storage::extend('local', function ($app, $config) use ($fsClass) {
+            Storage::extend('local', function ($app, $config) {
                 $permissions = Arr::get($config, 'permissions', []);
 
-                return new $fsClass(new \League\Flysystem\Adapter\Local($config['root'], LOCK_EX, \League\Flysystem\Adapter\Local::DISALLOW_LINKS, $permissions));
+                return new static::$fsClass(new \League\Flysystem\Adapter\Local($config['root'], LOCK_EX, \League\Flysystem\Adapter\Local::DISALLOW_LINKS, $permissions));
             });
 
-            Storage::extend('ftp', function ($app, $config) use ($fsClass) {
+            Storage::extend('ftp', function ($app, $config) {
                 $ftpConfig = Arr::only($config, [
                     'host', 'username', 'password', 'port', 'root', 'passive', 'ssl', 'timeout',
                 ]);
 
-                return new $fsClass(new \League\Flysystem\Adapter\Ftp($ftpConfig));
+                return new static::$fsClass(new \League\Flysystem\Adapter\Ftp($ftpConfig));
             });
 
             if (class_exists('\League\Flysystem\AwsS3v3\AwsS3Adapter')) {
-                Storage::extend('s3', function ($app, $config) use ($fsClass) {
+                Storage::extend('s3', function ($app, $config) {
                     $config += ['version' => 'latest'];
 
                     if ($config['key'] && $config['secret']) {
@@ -44,12 +46,12 @@ class FlysystemServiceProvider extends ServiceProvider
 
                     $root = Arr::get($config, 'root', null);
 
-                    return new $fsClass(new \League\Flysystem\AwsS3v3\AwsS3Adapter(new \Aws\S3\S3Client($config), $config['bucket'], $root));
+                    return new static::$fsClass(new \League\Flysystem\AwsS3v3\AwsS3Adapter(new \Aws\S3\S3Client($config), $config['bucket'], $root));
                 });
             }
 
             if (class_exists('\League\Flysystem\Rackspace\RackspaceAdapter')) {
-                Storage::extend('rackspace', function ($app, $config) use ($fsClass) {
+                Storage::extend('rackspace', function ($app, $config) {
                     $client = new \OpenCloud\Rackspace($config['endpoint'], [
                         'username' => $config['username'], 'apiKey' => $config['key'],
                     ]);
@@ -58,59 +60,59 @@ class FlysystemServiceProvider extends ServiceProvider
 
                     $store = $client->objectStoreService('cloudFiles', $config['region'], $urlType);
 
-                    return new $fsClass(new \League\Flysystem\Rackspace\RackspaceAdapter($store->getContainer($config['container'])));
+                    return new static::$fsClass(new \League\Flysystem\Rackspace\RackspaceAdapter($store->getContainer($config['container'])));
                 });
             }
         }
         // Otherwise, just set up the extended filesystems with the normal class
         else {
-            $fsClass = \League\Flysystem\Filesystem::class;
+            static::$fsClass = \League\Flysystem\Filesystem::class;
         }
 
-        Storage::extend('null', function ($app, $config) use ($fsClass) {
-            return new $fsClass(new \League\Flysystem\Adapter\NullAdapter);
+        Storage::extend('null', function ($app, $config) {
+            return new static::$fsClass(new \League\Flysystem\Adapter\NullAdapter);
         });
 
         if (class_exists('\League\Flysystem\Azure\AzureAdapter')) {
-            Storage::extend('azure', function ($app, $config) use ($fsClass) {
+            Storage::extend('azure', function ($app, $config) {
                 $endpoint = sprintf('DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s', $config['accountName'], $config['apiKey']);
                 $client = \WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService($endpoint);
 
-                return new $fsClass(new \League\Flysystem\Azure\AzureAdapter($client, $config['container']));
+                return new static::$fsClass(new \League\Flysystem\Azure\AzureAdapter($client, $config['container']));
             });
         }
 
         if (class_exists('\League\Flysystem\Copy\CopyAdapter')) {
-            Storage::extend('copy', function ($app, $config) use ($fsClass) {
+            Storage::extend('copy', function ($app, $config) {
                 $client = new \Barracuda\Copy\API($config['consumerKey'], $config['consumerSecret'], $config['accessToken'], $config['tokenSecret']);
-                return new $fsClass(new \League\Flysystem\Copy\CopyAdapter($client));
+                return new static::$fsClass(new \League\Flysystem\Copy\CopyAdapter($client));
             });
         }
 
         if (class_exists('\League\Flysystem\Dropbox\DropboxAdapter')) {
-            Storage::extend('dropbox', function ($app, $config) use ($fsClass) {
+            Storage::extend('dropbox', function ($app, $config) {
                 $client = new \Dropbox\Client($config['accessToken'], $config['clientIdentifier']);
-                return new $fsClass(new \League\Flysystem\Dropbox\DropboxAdapter($client));
+                return new static::$fsClass(new \League\Flysystem\Dropbox\DropboxAdapter($client));
             });
         }
 
         if (class_exists('\League\Flysystem\GridFS\GridFSAdapter')) {
-            Storage::extend('gridfs', function ($app, $config) use ($fsClass) {
+            Storage::extend('gridfs', function ($app, $config) {
                 $mongoClient = new \MongoClient($config['server'], Arr::except($config, ['driver', 'server', 'context', 'dbName']), Arr::get($config, 'context', null));
                 $gridFs = $mongoClient->selectDB($config['dbName'])->getGridFS();
 
-                return new $fsClass(new \League\Flysystem\GridFS\GridFSAdapter($gridFs));
+                return new static::$fsClass(new \League\Flysystem\GridFS\GridFSAdapter($gridFs));
             });
         }
 
         if (class_exists('\League\Flysystem\Memory\MemoryAdapter')) {
-            Storage::extend('memory', function ($app, $config) use ($fsClass) {
-                return new $fsClass(new \League\Flysystem\Memory\MemoryAdapter());
+            Storage::extend('memory', function ($app, $config) {
+                return new static::$fsClass(new \League\Flysystem\Memory\MemoryAdapter());
             });
         }
 
         if (class_exists('\League\Flysystem\Phpcr\PhpcrAdapter')) {
-            Storage::extend('phpcr', function ($app, $config) use ($fsClass) {
+            Storage::extend('phpcr', function ($app, $config) {
                 $credentials = new \PHPCR\SimpleCredentials(null, null);
                 $logger = new \Jackalope\Transport\LoggingPsr3Logger(Log::getMonolog());
 
@@ -138,30 +140,30 @@ class FlysystemServiceProvider extends ServiceProvider
 
                 $session = $repository->login($credentials, $config['workspace']);
 
-                return new $fsClass(new \League\Flysystem\Phpcr\PhpcrAdapter($session, $config['root']));
+                return new static::$fsClass(new \League\Flysystem\Phpcr\PhpcrAdapter($session, $config['root']));
             });
         }
 
         if (class_exists('\League\Flysystem\Replicate\ReplicateAdapter')) {
-            Storage::extend('replicate', function ($app, $config) use ($fsClass) {
-                return new $fsClass(new \League\Flysystem\Replicate\ReplicateAdapter(Storage::disk($config['master'])->getAdapter(), Storage::disk($config['replica'])->getAdapter()));
+            Storage::extend('replicate', function ($app, $config) {
+                return new static::$fsClass(new \League\Flysystem\Replicate\ReplicateAdapter(Storage::disk($config['master'])->getAdapter(), Storage::disk($config['replica'])->getAdapter()));
             });
         }
 
         if (class_exists('\League\Flysystem\Sftp\SftpAdapter')) {
-            Storage::extend('sftp', function ($app, $config) use ($fsClass) {
-                return new $fsClass(new \League\Flysystem\Sftp\SftpAdapter($config));
+            Storage::extend('sftp', function ($app, $config) {
+                return new static::$fsClass(new \League\Flysystem\Sftp\SftpAdapter($config));
             });
         }
 
         if (class_exists('\League\Flysystem\Vfs\VfsAdapter')) {
-            Storage::extend('vfs', function ($app, $config) use ($fsClass) {
-                return new $fsClass(new \League\Flysystem\Vfs\VfsAdapter(new VirtualFileSystem\FileSystem()));
+            Storage::extend('vfs', function ($app, $config) {
+                return new static::$fsClass(new \League\Flysystem\Vfs\VfsAdapter(new VirtualFileSystem\FileSystem()));
             });
         }
 
         if (class_exists('\League\Flysystem\WebDAV\WebDAVAdapter')) {
-            Storage::extend('webdav', function ($app, $config) use ($fsClass) {
+            Storage::extend('webdav', function ($app, $config) {
                 if ( ! empty($config['authType'])) {
                     if (is_string($config['authType']) && strtolower($config['authType']) == 'ntlm') {
                         $config['authType'] = \Sabre\DAV\Client::AUTH_NTLM;
@@ -205,13 +207,13 @@ class FlysystemServiceProvider extends ServiceProvider
                     }
                 }
 
-                return new $fsClass(new \League\Flysystem\WebDAV\WebDAVAdapter(new \Sabre\DAV\Client($config)));
+                return new static::$fsClass(new \League\Flysystem\WebDAV\WebDAVAdapter(new \Sabre\DAV\Client($config)));
             });
         }
 
         if (class_exists('\League\Flysystem\ZipArchive\ZipArchiveAdapter')) {
-            Storage::extend('zip', function ($app, $config) use ($fsClass) {
-                return new $fsClass(new \League\Flysystem\ZipArchive\ZipArchiveAdapter($config['path']));
+            Storage::extend('zip', function ($app, $config) {
+                return new static::$fsClass(new \League\Flysystem\ZipArchive\ZipArchiveAdapter($config['path']));
             });
         }
     }
@@ -223,10 +225,8 @@ class FlysystemServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $source = realpath(__DIR__ . '/filesystems.php');
+        $source = realpath(__DIR__ . '../config/filesystems.php');
 
         $this->publishes([$source => config_path('filesystems.php')]);
-
-        $this->mergeConfigFrom($source, 'filesystems');
     }
 }
