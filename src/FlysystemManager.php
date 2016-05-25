@@ -19,10 +19,7 @@ class FlysystemManager extends FilesystemManager
     ];
 
     /**
-     * Create a new filesystem manager instance.
-     *
-     * @param  \Illuminate\Contracts\Foundation\Application  $app
-     * @return void
+     * {@inheritdoc}
      */
     public function __construct($app)
     {
@@ -171,6 +168,67 @@ class FlysystemManager extends FilesystemManager
                 return $this->createFlysystem(new \League\Flysystem\ZipArchive\ZipArchiveAdapter($config['path']), $config);
             });
         }
+    }
+
+    protected function skipOverride()
+    {
+        return method_exists(parent::class, 'createFlysystem');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createLocalDriver(array $config)
+    {
+        if ($this->skipOverride()) {
+            $adapter = parent::createLocalDriver($config);
+        } else {
+            $adapter = $this->adapt($this->createFlysystem(parent::createLocalDriver($config)->getAdapter(), $config));
+        }
+
+        return $adapter;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createFtpDriver(array $config)
+    {
+        if ($this->skipOverride()) {
+            $adapter = parent::createFtpDriver($config);
+        } else {
+            $adapter = $this->adapt($this->createFlysystem(parent::createFtpDriver($config)->getAdapter(), $config));
+        }
+
+        return $adapter;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createS3Driver(array $config)
+    {
+        if ($this->skipOverride()) {
+            $adapter = parent::createS3Driver($config);
+        } else {
+            $adapter = $this->adapt($this->createFlysystem(parent::createS3Driver($config)->getAdapter(), $config));
+        }
+
+        return $adapter;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createRackspaceDriver(array $config)
+    {
+        if ($this->skipOverride()) {
+            $adapter = parent::createRackspaceDriver($config);
+        } else {
+            $adapter = $this->adapt($this->createFlysystem(parent::createRackspaceDriver($config)->getAdapter(), $config));
+        }
+
+        return $adapter;
     }
 
     /**
