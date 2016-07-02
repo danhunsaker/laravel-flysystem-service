@@ -14,20 +14,18 @@ Registers recognized Flysystem adapters with Laravel automatically.
 This lets you use other adapters without having to write your own service
 providers to load them properly.  It automatically detects which adapters are
 available, and registers only the ones actually installed.  It also detects
-whether the [Eventable](https://github.com/thephpleague/flysystem-eventable-filesystem)
-version of Flysystem is available, and if so, it switches to it, letting you
-listen in on Flysystem [events](http://event.thephpleague.com/) and affect them
+whether the [Eventable][] version of Flysystem is available, and if so, it
+switches to it, letting you listen in on Flysystem [events][] and affect them
 accordingly.
 
 > Note: This package only recognizes the adapters officially supported by
-> [The PHP League](https://github.com/thephpleague?query=flysystem)
-> (except AWS-S3-v2) - for other adapters, install
-> [danhunsaker/laravel-flysystem-others](https://github.com/danhunsaker/laravel-flysystem-others)
-> instead (it will pull in this package as a dependency).
+> [The PHP League][] (except AWS-S3-v2) - for other adapters, install
+> [danhunsaker/laravel-flysystem-others][] instead (it will pull in this package
+> as a dependency).
 
 ## Installation ##
 
-The usual methods for using [Composer](https://getcomposer.org) apply here:
+The usual methods for using [Composer][] apply here:
 
     composer require danhunsaker/laravel-flysystem-service
 
@@ -51,9 +49,7 @@ You can get example definitions for all supported filesystem drivers by
 publishing the replacement `filesystems` config - just run the following Artisan
 command:
 
-```
-php artisan vendor:publish --provider=Danhunsaker\\Laravel\\Flysystem\\FlysystemServiceProvider --force
-```
+    php artisan vendor:publish --provider=Danhunsaker\\Laravel\\Flysystem\\FlysystemServiceProvider --force
 
 The `--force` flag is required to overwrite the existing `filesystems` config
 that ships with Laravel.  You can also rename the existing file, then run the
@@ -75,12 +71,18 @@ to be used with Flysystem, this package supports it as well.  Ensure you have
 definition.  Multiple cache drivers are supported directly, and each has unique
 options you can configure alongside it, so we'll break those down, below.
 
-> A [library](https://github.com/madewithlove/illuminate-psr-cache-bridge) has
-> been written for wrapping the Laravel cache implementation for use with PSR-6
-> consumers (such as the aforementioned `Psr6Cache` driver), but it hasn't (as
-> of this writing) been published to Packagist for use by third parties.  Once
-> it becomes available, this package will be updated to use it to provide the
-> use of Laravel's own caching system with the cache decorator.
+#### Laravel Cache ####
+
+Thanks to the [madewithlove/illuminate-psr-cache-bridge][] package, you can just
+use Laravel's own cache to store cached filesystem data.
+
+```php
+    'cache' => [
+        'driver' => 'laravel',
+        'key'    => 'flysystem',
+        'expire' => 300,
+    ],
+```
 
 #### Flysystem Adapter ####
 
@@ -155,7 +157,7 @@ of a Stash cache driver, and the `options` array varies between which one you
 choose to use.  Alternately, you can set `backend` to a preconfigured instance
 of the driver, which is useful in cases such as the `Composite` driver, which is
 otherwise unsupported.  More information on these options is available on
-[the Stash site](http://www.stashphp.com/Drivers.html).
+[the Stash site][].
 
 ```php
     'cache' => [
@@ -227,4 +229,11 @@ Security issues should be reported directly to [danhunsaker (plus) laraflyserv
 
 And head to [GitHub][] for everything else.
 
-[GitHub]:https://github.com/danhunsaker/laravel-flysystem-service
+[composer]: https://getcomposer.org
+[danhunsaker/laravel-flysystem-others]: https://github.com/danhunsaker/laravel-flysystem-others
+[eventable]: https://github.com/thephpleague/flysystem-eventable-filesystem
+[events]: http://event.thephpleague.com/
+[github]: https://github.com/danhunsaker/laravel-flysystem-service
+[madewithlove/illuminate-psr-cache-bridge]: https://packagist.org/packages/madewithlove/illuminate-psr-cache-bridge
+[the php league]: https://github.com/thephpleague?query=flysystem
+[the stash site]: http://www.stashphp.com/Drivers.html

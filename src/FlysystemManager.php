@@ -11,6 +11,7 @@ class FlysystemManager extends FilesystemManager
 {
     protected $cacheDrivers = [
         'adapter'   => 'League\Flysystem\Cached\Storage\Adapter',
+        'laravel'   => 'Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool',
         'memcached' => 'League\Flysystem\Cached\Storage\Memcached',
         'memory'    => 'League\Flysystem\Cached\Storage\Memory',
         'noop'      => 'League\Flysystem\Cached\Storage\Noop',
@@ -261,6 +262,9 @@ class FlysystemManager extends FilesystemManager
                 switch ($driverName) {
                     case 'League\Flysystem\Cached\Storage\Adapter':
                         $cacheDriver = new \League\Flysystem\Cached\Storage\Adapter($this->disk(Arr::get($config, 'disk', 'local'))->getAdapter(), Arr::get($config, 'file', 'flysystem.cache'), Arr::get($config, 'expire', null));
+                        break;
+                    case 'Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool':
+                        $cacheDriver = new \League\Flysystem\Cached\Storage\Psr6Cache(new \Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool($this->app->make(\Illuminate\Contracts\Cache\Repository::class)), Arr::get($config, 'key', 'flysystem'), Arr::get($config, 'expire', null));
                         break;
                     case 'League\Flysystem\Cached\Storage\Memcached':
                         if (class_exists('Memcached')) {
