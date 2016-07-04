@@ -32,15 +32,23 @@ class FlysystemServiceProvider extends FilesystemServiceProvider
     }
 
     /**
+     * Register the expanded configuration.
+     *
+     * @return void
+     */
+    protected function registerConfig()
+    {
+        $this->publishes([realpath(__DIR__ . '/../config/filesystems.php') => config_path('filesystems.php')]);
+    }
+
+    /**
      * Register the application services.
      *
      * @return void
      */
     public function register()
     {
-        $source = realpath(__DIR__ . '../config/filesystems.php');
-
-        $this->publishes([$source => config_path('filesystems.php')]);
+        $this->registerConfig();
 
         parent::register();
     }
