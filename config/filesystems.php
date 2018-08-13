@@ -8,16 +8,12 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default filesystem disk that should be used
-    | by the framework. A "local" driver, as well as a variety of cloud
-    | based drivers are available for your choosing. Just store away!
-    |
-    | Supported: "local", "ftp", "s3", "rackspace", "null", "azure", "copy",
-    |            "dropbox", "gridfs", "memory", "phpcr", "replicate", "sftp",
-    |            "vfs", "webdav", "zip"
+    | by the framework. The "local" disk, as well as a variety of cloud
+    | based disks are available to your application. Just store away!
     |
     */
 
-    'default' => 'local',
+    'default' => env('FILESYSTEM_DRIVER', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -30,7 +26,7 @@ return [
     |
     */
 
-    'cloud' => 's3',
+    'cloud' => env('FILESYSTEM_CLOUD', 's3'),
 
     /*
     |--------------------------------------------------------------------------
@@ -41,21 +37,24 @@ return [
     | may even configure multiple disks of the same driver. Defaults have
     | been setup for each driver as an example of the required options.
     |
+    | Supported: "local", "ftp", "s3", "rackspace", "null", "azure", "copy",
+    |            "dropbox", "gridfs", "memory", "phpcr", "replicate", "sftp",
+    |            "vfs", "webdav", "zip"
+    |
     */
 
     'disks' => [
 
         'local' => [
-            'driver'      => 'local',
-            'root'        => storage_path('app'),
+            'driver' => 'local',
+            'root' => storage_path('app'),
+        ],
 
-            // Optional cache settings, available with any storage driver
-            'cache'       => [
-                'driver' => 'laravel',
-            ],
-
-            // Optional Local Settings...
-            // 'permissions' => [],
+        'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
         ],
 
         'ftp' => [
@@ -74,13 +73,16 @@ return [
 
         's3' => [
             'driver' => 's3',
-            'key'    => 'your-key',
-            'secret' => 'your-secret',
-            'region' => 'your-region',
-            'bucket' => 'your-bucket',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'url' => env('AWS_URL'),
 
-            // Optional S3 Settings...
-            // 'root'   => '',
+            // Optional cache settings, available with any storage driver
+            'cache'       => [
+                'driver' => 'laravel',
+            ],
         ],
 
         'rackspace' => [
@@ -102,20 +104,6 @@ return [
             'accountName' => 'your-account-name',
             'apiKey'      => 'your-api-key',
             'container'   => 'your-container',
-        ],
-
-        'copy' => [
-            'driver'         => 'copy',
-            'consumerKey'    => 'your-consumer-key',
-            'consumerSecret' => 'your-consumer-secret',
-            'accessToken'    => 'your-access-token',
-            'tokenSecret'    => 'your-token-secret',
-        ],
-
-        'dropbox' => [
-            'driver'           => 'dropbox',
-            'accessToken'      => 'your-access-token',
-            'clientIdentifier' => 'your-client-identifier',
         ],
 
         'gridfs' => [

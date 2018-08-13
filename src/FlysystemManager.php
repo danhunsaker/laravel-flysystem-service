@@ -35,25 +35,6 @@ class FlysystemManager extends FilesystemManager
             });
         }
 
-        if (class_exists('\League\Flysystem\Copy\CopyAdapter')) {
-            $this->extend('copy', function ($app, $config) {
-                $client = new \Barracuda\Copy\API($config['consumerKey'], $config['consumerSecret'], $config['accessToken'], $config['tokenSecret']);
-                return $this->createFlysystem(new \League\Flysystem\Copy\CopyAdapter($client), $config);
-            });
-        }
-
-        if (class_exists('\Spatie\FlysystemDropbox\DropboxAdapter')) {
-            $this->extend('dropbox', function ($app, $config) {
-                $client = new \Spatie\Dropbox\Client($config['accessToken'], $config['clientIdentifier']);
-                return $this->createFlysystem(new \Spatie\FlysystemDropbox\DropboxAdapter($client), $config);
-            });
-        } elseif (class_exists('\Srmklive\Dropbox\Adapter\DropboxAdapter')) {
-            $this->extend('dropbox', function ($app, $config) {
-                $client = new \Srmklive\Dropbox\Client\DropboxClient($config['accessToken'], $config['clientIdentifier']);
-                return $this->createFlysystem(new \Srmklive\Dropbox\Adapter\DropboxAdapter($client), $config);
-            });
-        }
-
         if (class_exists('\League\Flysystem\GridFS\GridFSAdapter')) {
             $this->extend('gridfs', function ($app, $config) {
                 $mongoClient = new \MongoClient($config['server'], Arr::except($config, ['driver', 'server', 'context', 'dbName']), Arr::get($config, 'context', null));

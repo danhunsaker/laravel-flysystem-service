@@ -16,7 +16,6 @@
         "league/flysystem-aws-s3-v3": "Required to use the 's3' adapter (^1.0)",
         "league/flysystem-azure-blob-storage": "Required to use the 'azure' adapter (^1.0)",
         "league/flysystem-cached-adapter": "Required to use metadata caching (^1.0)",
-        "league/flysystem-copy": "Required to use the 'copy' adapter (^1.0)",
         "league/flysystem-eventable-filesystem": "Required to hook into filesystem Events (^1.0)",
         "league/flysystem-gridfs": "Required to use the 'gridfs' adapter (^1.0)",
         "league/flysystem-memory": "Required to use the 'memory' adapter (^1.0)",
@@ -27,9 +26,7 @@
         "league/flysystem-webdav": "Required to use the 'webdav' adapter (^1.0)",
         "league/flysystem-vfs": "Required to use the 'vfs' adapter (^1.0)",
         "league/flysystem-ziparchive": "Required to use the 'zip' adapter (^1.0)",
-        "madewithlove/illuminate-psr-cache-bridge": "Required to use Laravel's cache implementation for Flysystem caching (^1.0)",
-        "spatie/flysystem-dropbox": "Required to use the 'dropbox' adapter in PHP 7 (^1.0)",
-        "srmklive/flysystem-dropbox-v2": "Required to use the 'dropbox' adapter in PHP 5 (^1.0)"
+        "madewithlove/illuminate-psr-cache-bridge": "Required to use Laravel's cache implementation for Flysystem caching (^1.0)"
     },
     "minimum-stability": "dev",
     "autoload": {
@@ -40,6 +37,11 @@
     "extra": {
         "branch-alias": {
             "dev-master": "1.x-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Danhunsaker\\Laravel\\Flysystem\\FlysystemServiceProvider"
+            ]
         }
     }
 }
