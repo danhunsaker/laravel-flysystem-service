@@ -26,12 +26,12 @@ class FlysystemManager extends FilesystemManager
     {
         parent::__construct($app);
 
-        if (class_exists('\League\Flysystem\Azure\AzureAdapter')) {
+        if (class_exists('\League\Flysystem\AzureBlobStorage\AzureBlobStorageAdapter')) {
             $this->extend('azure', function ($app, $config) {
                 $endpoint = sprintf('DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s', $config['accountName'], $config['apiKey']);
-                $client = \WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService($endpoint);
+                $client = \MicrosoftAzure\Storage\Blob\BlobRestProxy::createBlobService($endpoint);
 
-                return $this->createFlysystem(new \League\Flysystem\Azure\AzureAdapter($client, $config['container']), $config);
+                return $this->createFlysystem(new \League\Flysystem\AzureBlobStorage\AzureBlobStorageAdapter($client, $config['container']), $config);
             });
         }
 
@@ -42,10 +42,15 @@ class FlysystemManager extends FilesystemManager
             });
         }
 
-        if (class_exists('\League\Flysystem\Dropbox\DropboxAdapter')) {
+        if (class_exists('\Spatie\FlysystemDropbox\DropboxAdapter')) {
             $this->extend('dropbox', function ($app, $config) {
-                $client = new \Dropbox\Client($config['accessToken'], $config['clientIdentifier']);
-                return $this->createFlysystem(new \League\Flysystem\Dropbox\DropboxAdapter($client), $config);
+                $client = new \Spatie\Dropbox\Client($config['accessToken'], $config['clientIdentifier']);
+                return $this->createFlysystem(new \Spatie\FlysystemDropbox\DropboxAdapter($client), $config);
+            });
+        } elseif (class_exists('\Srmklive\Dropbox\Adapter\DropboxAdapter')) {
+            $this->extend('dropbox', function ($app, $config) {
+                $client = new \Srmklive\Dropbox\Client\DropboxClient($config['accessToken'], $config['clientIdentifier']);
+                return $this->createFlysystem(new \Srmklive\Dropbox\Adapter\DropboxAdapter($client), $config);
             });
         }
 
