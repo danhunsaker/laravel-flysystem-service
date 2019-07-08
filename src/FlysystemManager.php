@@ -323,7 +323,7 @@ class FlysystemManager extends FilesystemManager
         }
 
         $config = Arr::only($config, ['visibility']);
-		$config = array_merge($config, $driverConfig);
+		$config = array_merge($config, (array) $driverConfig);
 
         return new $fsClass($adapter, count($config) > 0 ? $config : null);
     }
