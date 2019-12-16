@@ -310,7 +310,7 @@ class FlysystemManager extends FilesystemManager
      * @param  array  $config
      * @return \League\Flysystem\FlysystemInterface
      */
-    protected function createFlysystem(AdapterInterface $adapter, array $config)
+    protected function createFlysystem(AdapterInterface $adapter, array $config, array $driverConfig = null)
     {
         if (class_exists('League\Flysystem\EventableFilesystem\EventableFilesystem')) {
             $fsClass = \League\Flysystem\EventableFilesystem\EventableFilesystem::class;
@@ -323,6 +323,7 @@ class FlysystemManager extends FilesystemManager
         }
 
         $config = Arr::only($config, ['visibility']);
+        $config = array_merge($config, (array) $driverConfig);
 
         return new $fsClass($adapter, count($config) > 0 ? $config : null);
     }
