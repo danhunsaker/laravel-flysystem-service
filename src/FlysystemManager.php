@@ -26,6 +26,10 @@ class FlysystemManager extends FilesystemManager
     {
         parent::__construct($app);
 
+        if (class_exists('\Symfony\Component\Cache\Adapter\Psr16Adapter')) {
+            $this->cacheDrivers['laravel'] = 'Symfony\Component\Cache\Adapter\Psr16Adapter';
+        }
+
         if (class_exists('\League\Flysystem\AzureBlobStorage\AzureBlobStorageAdapter')) {
             $this->extend('azure', function ($app, $config) {
                 $endpoint = sprintf('DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s', $config['accountName'], $config['apiKey']);
@@ -83,13 +87,28 @@ class FlysystemManager extends FilesystemManager
             });
         }
 
+        if (class_exists('\League\Flysystem\Rackspace\RackspaceAdapter') && !method_exists(parent, 'createRackspaceDriver')) {
+            $this->extend('rackspace', function ($app, $config) {
+                $client = new \OpenCloud\Rackspace($config['endpoint'], [
+                    'username' => $config['username'],
+                    'apiKey' => $config['key'],
+                ], $config['options'] ?? []);
+
+                $store = $client->objectStoreService('cloudFiles', $config['region'], $config['url_type'] ?? null);
+
+                $container = $store->getContainer($config['container']);
+
+                return $this->createFlysystem(new \League\Flysystem\Rackspace\RackspaceAdapter($container, $config['root'] ?? null), $config);
+            });
+        }
+
         if (class_exists('\League\Flysystem\Replicate\ReplicateAdapter')) {
             $this->extend('replicate', function ($app, $config) {
                 return $this->createFlysystem(new \League\Flysystem\Replicate\ReplicateAdapter($this->disk($config['master'])->getAdapter(), $this->disk($config['replica'])->getAdapter()), $config);
             });
         }
 
-        if (class_exists('\League\Flysystem\Sftp\SftpAdapter')) {
+        if (class_exists('\League\Flysystem\Sftp\SftpAdapter' && !method_exists(parent, 'createSftpDriver'))) {
             $this->extend('sftp', function ($app, $config) {
                 return $this->createFlysystem(new \League\Flysystem\Sftp\SftpAdapter($config), $config);
             });
@@ -193,6 +212,20 @@ class FlysystemManager extends FilesystemManager
     /**
      * {@inheritdoc}
      */
+    public function createSftpDriver(array $config)
+    {
+        if ($this->skipOverride()) {
+            $adapter = parent::createSftpDriver($config);
+        } else {
+            $adapter = $this->adapt($this->createFlysystem(parent::createSftpDriver($config)->getAdapter(), $config));
+        }
+
+        return $adapter;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function createS3Driver(array $config)
     {
         if ($this->skipOverride()) {
@@ -248,6 +281,9 @@ class FlysystemManager extends FilesystemManager
                 switch ($driverName) {
                     case 'League\Flysystem\Cached\Storage\Adapter':
                         $cacheDriver = new \League\Flysystem\Cached\Storage\Adapter($this->disk(Arr::get($config, 'disk', 'local'))->getAdapter(), Arr::get($config, 'file', 'flysystem.cache'), Arr::get($config, 'expire', null));
+                        break;
+                    case 'Symfony\Component\Cache\Adapter\Psr16Adapter':
+                        $cacheDriver = new \League\Flysystem\Cached\Storage\Psr6Cache($this->app->make('cache.psr6'), Arr::get($config, 'key', 'flysystem'), Arr::get($config, 'expire', null));
                         break;
                     case 'Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool':
                         $cacheDriver = new \League\Flysystem\Cached\Storage\Psr6Cache(new \Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool($this->app->make(\Illuminate\Contracts\Cache\Repository::class)), Arr::get($config, 'key', 'flysystem'), Arr::get($config, 'expire', null));
