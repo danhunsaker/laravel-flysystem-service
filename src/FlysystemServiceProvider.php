@@ -7,18 +7,6 @@ use Illuminate\Filesystem\FilesystemServiceProvider;
 
 class FlysystemServiceProvider extends FilesystemServiceProvider
 {
-    protected static $fsClass;
-
-    /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        //
-    }
-
     /**
      * Register the filesystem manager.
      *

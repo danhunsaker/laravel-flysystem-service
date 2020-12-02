@@ -4,3 +4,5 @@ coverage/
 *.coverage.*
 vendor/
 *.bak
+
+.idea/

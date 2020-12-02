@@ -4,8 +4,8 @@ namespace Danhunsaker\Laravel\Flysystem;
 
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use League\Flysystem\AdapterInterface;
-use Log;
 
 class FlysystemManager extends FilesystemManager
 {
@@ -87,7 +87,7 @@ class FlysystemManager extends FilesystemManager
             });
         }
 
-        if (class_exists('\League\Flysystem\Rackspace\RackspaceAdapter') && !method_exists(parent, 'createRackspaceDriver')) {
+        if (class_exists('\League\Flysystem\Rackspace\RackspaceAdapter') && !method_exists(parent::class, 'createRackspaceDriver')) {
             $this->extend('rackspace', function ($app, $config) {
                 $client = new \OpenCloud\Rackspace($config['endpoint'], [
                     'username' => $config['username'],
@@ -108,7 +108,7 @@ class FlysystemManager extends FilesystemManager
             });
         }
 
-        if (class_exists('\League\Flysystem\Sftp\SftpAdapter' && !method_exists(parent, 'createSftpDriver'))) {
+        if (class_exists('\League\Flysystem\Sftp\SftpAdapter' && !method_exists(parent::class, 'createSftpDriver'))) {
             $this->extend('sftp', function ($app, $config) {
                 return $this->createFlysystem(new \League\Flysystem\Sftp\SftpAdapter($config), $config);
             });
